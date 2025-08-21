@@ -1,0 +1,64 @@
+/* Light mode (default) */
+body.light {
+  --nav-bg: #ffffff;
+  --nav-fg: #0f172a;
+  --nav-border: #e5e7eb;
+  --nav-accent: #2563eb;
+}
+
+/* Dark mode */
+body.dark {
+  --nav-bg: #0f172a;
+  --nav-fg: #e2e8f0;
+  --nav-border: #1f2937;
+  --nav-accent: #22c55e;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar */
+nav {
+  background-color: var(--nav-bg);
+  color: var(--nav-fg);
+  padding: 10px;
+  border-bottom: 1px solid var(--nav-border);
+}
+
+nav a {
+  color: var(--nav-fg);
+  margin-right: 15px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: var(--nav-accent);
+}
+
+/* Welcome Page */
+.welcome-container {
+  text-align: center;
+  padding: 50px;
+}
+
+.welcome-container h1 {
+  font-size: 2.5rem;
+}
+
+.welcome-container p {
+  font-size: 1.2rem;
+}
+
+.welcome-container a {
+  font-size: 1.2rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.welcome-container a:hover {
+  text-decoration: underline;
+}
