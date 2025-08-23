@@ -174,18 +174,21 @@ export default function ProfilePage() {
       )}
 
       {/* Media */}
-      {viewEntry.media?.length > 0 && (
-        <div className="media-grid">
-          {viewEntry.media.map((m, idx) => {
-            const src = fileUrl(m.url);
-            if (/\.(png|jpe?g|gif|webp|avif)$/i.test(src))
-              return <img key={idx} className="media-grid__item" src={src} alt="" />;
-            if (/\.(mp4|webm|ogg|mov|m4v)$/i.test(src))
-              return <video key={idx} className="media-grid__item" src={src} controls />;
-            return null;
-          })}
-        </div>
-      )}
+{viewEntry.media?.length > 0 && (
+  <div className="view-media-container">
+    {viewEntry.media.map((m, idx) => {
+      const src = fileUrl(m.url);
+      if (/\.(png|jpe?g|gif|webp|avif)$/i.test(src)) {
+        return <img key={idx} className="view-media" src={src} alt="" />;
+      }
+      if (/\.(mp4|webm|ogg|mov|m4v)$/i.test(src)) {
+        return <video key={idx} className="view-media" src={src} controls />;
+      }
+      return null;
+    })}
+  </div>
+)}
+
 
       <button onClick={closeView}>Close</button>
     </div>

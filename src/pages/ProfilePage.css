@@ -247,3 +247,17 @@ body {
   width: 100%;
 }
 
+.view-media-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+  overflow-y: auto; /* scroll if large */
+}
+
+.view-media {
+  width: auto;   /* keep natural width */
+  height: auto;  /* keep natural height */
+  max-width: 100%; /* prevent breaking layout */
+  object-fit: contain;
+}
