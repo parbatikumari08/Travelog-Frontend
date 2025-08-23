@@ -1,5 +1,5 @@
 // frontend/src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../api";
@@ -8,6 +8,11 @@ const LoginPage = ({ setUser }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // ✅ Show demo credentials once when component loads
+  useEffect(() => {
+    alert("Demo Login 👉 Email: vini08@gmail.com | Password: Vini@123");
+  }, []);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
