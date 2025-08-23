@@ -202,7 +202,7 @@ export default function ProfilePage() {
             {/* Editable Map */}
             {editEntry.location && (
               <div className="modal__map">
-                <MapComponent
+                <MiniMap
                   location={editEntry.location}
                   height="300px"
                   zoom={10}
