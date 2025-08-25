@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000", // backend server
+  baseURL: "https://travelog-backend-2.onrender.com", // backend server
   withCredentials: true,            // allow cookies for sessions
 });
 
