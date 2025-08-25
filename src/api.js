@@ -2,8 +2,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://travelog-backend-2.onrender.com", // backend server
-  withCredentials: true,            // allow cookies for sessions
+  baseURL: import.meta.env.VITE_API_BASE_URL, // ✅ must be "baseURL"
+  withCredentials: true,                      // allow cookies for sessions
 });
 
 export default api;
