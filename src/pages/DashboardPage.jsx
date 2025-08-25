@@ -1,21 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, useMapEvents, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "../api";
-
-// ✅ Keep your main MapComponent import (requested)
 import MapComponent from "../components/MapComponent";
-
-// ✅ New: lightweight, static preview map for the card/form preview
 import MiniMap from "../components/MiniMap";
-
 import L from "leaflet";
 
-// Configure Leaflet default icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
@@ -29,6 +22,9 @@ export default function DashboardPage() {
     videos: [],
   });
   const [message, setMessage] = useState("");
+
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   const shell = useMemo(
     () => ({
@@ -93,7 +89,6 @@ export default function DashboardPage() {
     []
   );
 
-  // Map click handler
   function MapClickHandler() {
     useMapEvents({
       click(e) {
@@ -105,68 +100,60 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Form handlers
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "images")
-      setFormData((s) => ({ ...s, images: Array.from(files) }));
-    else if (name === "videos")
-      setFormData((s) => ({ ...s, videos: Array.from(files) }));
+    if (name === "images") setFormData((s) => ({ ...s, images: Array.from(files) }));
+    else if (name === "videos") setFormData((s) => ({ ...s, videos: Array.from(files) }));
     else setFormData((s) => ({ ...s, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!newEntryPos) {
-    setMessage("Please click on the map to select a location first.");
-    return;
-  }
+    e.preventDefault();
+    if (!newEntryPos) {
+      setMessage("Please click on the map to select a location first.");
+      return;
+    }
 
-  setMessage("Adding entry...");
-  try {
-    const fd = new FormData();
-    fd.append("title", formData.title);
-    fd.append("description", formData.description);
+    setMessage("Adding entry...");
+    try {
+      const fd = new FormData();
+      fd.append("title", formData.title);
+      fd.append("description", formData.description);
+      fd.append("location", JSON.stringify(newEntryPos));
+      formData.images.forEach((f) => fd.append("files", f));
+      formData.videos.forEach((f) => fd.append("files", f));
 
-    // ✅ FIX: stringify the lat/lng into one "location" field
-    fd.append("location", JSON.stringify(newEntryPos));
+      await api.post("/entries", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    formData.images.forEach((f) => fd.append("files", f));
-    formData.videos.forEach((f) => fd.append("files", f));
+      setFormData({ title: "", description: "", images: [], videos: [] });
+      setNewEntryPos(null);
 
-    await api.post("/entries", fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+      if (imageInputRef.current) imageInputRef.current.value = "";
+      if (videoInputRef.current) videoInputRef.current.value = "";
 
-    setFormData({ title: "", description: "", images: [], videos: [] });
-    setNewEntryPos(null);
-    setMessage("✅ Entry added in your Profile! Click on the map to add another.");
-  } catch (err) {
-    console.error(err);
-    setMessage("❌ Failed to add entry. Try again.");
-  }
-};
-
+      setMessage("✅ Entry added in your Profile! Click on the map to add another.");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to add entry. Try again.");
+    }
+  };
 
   return (
     <div style={shell.page}>
       <div style={shell.grid}>
-        {/* Left panel: always visible */}
         <div style={{ height: "100%", overflow: "hidden auto" }}>
           <div style={shell.card}>
             <h2 style={{ margin: "0 0 12px 0" }}>Add New Entry</h2>
 
-            {/* ✅ Minimap preview only if location selected (static, pinned) */}
             {newEntryPos && (
               <div style={{ marginBottom: 12 }}>
                 <MiniMap location={newEntryPos} height="150px" zoom={7} />
               </div>
             )}
 
-            <form
-              onSubmit={handleSubmit}
-              style={{ display: "grid", gap: 10 }}
-            >
+            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 10 }}>
               <input
                 type="text"
                 name="title"
@@ -193,6 +180,7 @@ export default function DashboardPage() {
                   accept="image/*"
                   multiple
                   onChange={handleChange}
+                  ref={imageInputRef}
                 />
               </div>
               <div>
@@ -203,6 +191,7 @@ export default function DashboardPage() {
                   accept="video/*"
                   multiple
                   onChange={handleChange}
+                  ref={videoInputRef}
                 />
               </div>
 
@@ -214,16 +203,11 @@ export default function DashboardPage() {
                 Add Entry
               </button>
             </form>
-            {message && (
-              <p style={{ marginTop: 8, ...shell.muted }}>{message}</p>
-            )}
+            {message && <p style={{ marginTop: 8, ...shell.muted }}>{message}</p>}
           </div>
         </div>
 
-        {/* Right panel: interactive picker map */}
-        <div
-          style={{ height: "100%", display: "flex", flexDirection: "column" }}
-        >
+        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <p
             style={{
               textAlign: "center",
@@ -239,15 +223,9 @@ export default function DashboardPage() {
             🗺️ Zoom and click on the desired location for entry
           </p>
           <div style={{ flex: 1 }}>
-            <MapContainer
-              center={[20, 77]}
-              zoom={5}
-              style={{ height: "100%", width: "100%" }}
-            >
+            <MapContainer center={[20, 77]} zoom={5} style={{ height: "100%", width: "100%" }}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {newEntryPos && (
-                <Marker position={[newEntryPos.lat, newEntryPos.lng]} />
-              )}
+              {newEntryPos && <Marker position={[newEntryPos.lat, newEntryPos.lng]} />}
               <MapClickHandler />
             </MapContainer>
           </div>
