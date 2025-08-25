@@ -82,21 +82,35 @@ export default function ProfilePage() {
   const closeView = () => { setViewEntry(null); };
 
   const uploadMoreMedia = async () => {
-    if (!editEntry || !newMediaFiles.length) return;
-    setEditorMsg("Uploading...");
-    try {
-      const fd = new FormData();
-      newMediaFiles.forEach(f => fd.append("files", f));
-      const res = await api.post(`/entries/${editEntry._id}/upload`, fd, { headers: { "Content-Type": "multipart/form-data" } });
-      if (res.status === 200) {
-        await refreshEntries();
-        const updated = [...activeEntries, ...archivedEntries].find(e => e._id === editEntry._id);
-        if (updated) setEditEntry(updated);
-        setNewMediaFiles([]);
-        setEditorMsg("Uploaded successfully.");
-      } else setEditorMsg("Upload failed.");
-    } catch (err) { console.error(err); setEditorMsg("Upload failed."); }
-  };
+  if (!editEntry || !newMediaFiles.length) return;
+  setEditorMsg("Uploading...");
+  try {
+    const fd = new FormData();
+    newMediaFiles.forEach(f => fd.append("media", f)); // ✅ use "media" not "files"
+
+    const res = await api.post(`/entries/${editEntry._id}/media`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (res.status === 200 && Array.isArray(res.data)) {
+      // ✅ merge new media with old
+      setEditEntry(prev => ({
+        ...prev,
+        media: [...(prev.media || []), ...res.data],
+      }));
+
+      await refreshEntries(); // reload entry cards
+      setNewMediaFiles([]);
+      setEditorMsg("Uploaded successfully.");
+    } else {
+      setEditorMsg("Upload failed.");
+    }
+  } catch (err) {
+    console.error(err);
+    setEditorMsg("Upload failed.");
+  }
+};
+
 
   if (loading) return <div className="profile__loading">Loading...</div>;
 
