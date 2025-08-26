@@ -120,8 +120,8 @@ export default function DashboardPage() {
       fd.append("title", formData.title);
       fd.append("description", formData.description);
       fd.append("location", JSON.stringify(newEntryPos));
-      formData.images.forEach((f) => fd.append("files", f));
-      formData.videos.forEach((f) => fd.append("files", f));
+      formData.images.forEach((f) => fd.append("media", f));
+      formData.videos.forEach((f) => fd.append("media", f));
 
       await api.post("/entries", fd, {
         headers: { "Content-Type": "multipart/form-data" },
