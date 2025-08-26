@@ -60,25 +60,26 @@ const App = () => {
       )}
 
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <WelcomePage />} />
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/dashboard" /> : <LoginPage setUser={setUser} />}
-        />
-        <Route
-          path="/register"
-          element={user ? <Navigate to="/dashboard" /> : <RegisterPage setUser={setUser} />}
-        />
-        <Route
-          path="/dashboard"
-          element={user ? <DashboardPage user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/profile"
-          element={user ? <ProfilePage user={user} /> : <Navigate to="/login" />}
-        />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+  <Route path="/" element={<WelcomePage />} />
+  <Route
+    path="/login"
+    element={user ? <Navigate to="/dashboard" /> : <LoginPage setUser={setUser} />}
+  />
+  <Route
+    path="/register"
+    element={user ? <Navigate to="/dashboard" /> : <RegisterPage setUser={setUser} />}
+  />
+  <Route
+    path="/dashboard"
+    element={user ? <DashboardPage user={user} /> : <Navigate to="/login" />}
+  />
+  <Route
+    path="/profile"
+    element={user ? <ProfilePage user={user} /> : <Navigate to="/login" />}
+  />
+  <Route path="*" element={<Navigate to="/" />} />
+</Routes>
+
     </Router>
   );
 };
