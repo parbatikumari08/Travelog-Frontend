@@ -165,8 +165,6 @@ body.dark .navbar {
   z-index: 5000;
   background: var(--card);
 }
-body {
-  padding-top: 70px; /* height of navbar */
-}
+
 
 
