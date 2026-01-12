@@ -12,13 +12,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Helper to force map resize after mount
+// Force map to recalc size after render
 function ResizeMap() {
   const map = useMap();
   useEffect(() => {
     setTimeout(() => {
       map.invalidateSize();
-    }, 0);
+    }, 200); // small delay for modal transitions
   }, [map]);
   return null;
 }
@@ -26,28 +26,41 @@ function ResizeMap() {
 export default function MiniMap({ location, height = "150px", zoom = 7 }) {
   if (!location) return null;
 
+  // Support both:
+  // { lat, lng }
+  // { coordinates: [lng, lat] }
+  const finalLocation = location.lat
+    ? location
+    : {
+        lat: location.coordinates?.[1],
+        lng: location.coordinates?.[0],
+      };
+
+  if (!finalLocation?.lat || !finalLocation?.lng) return null;
+
   return (
     <div
       style={{
         width: "100%",
         height,
-        borderRadius: "8px",
+        borderRadius: "10px",
         overflow: "hidden",
         marginTop: "0.5rem",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
       }}
     >
       <MapContainer
-        center={[location.lat, location.lng]}
+        center={[finalLocation.lat, finalLocation.lng]}
         zoom={zoom}
         scrollWheelZoom={false}
         dragging={false}
         doubleClickZoom={false}
         zoomControl={false}
         attributionControl={false}
-        style={{ height: "100%", width: "100%" }}
+        style={{ width: "100%", height: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker position={[location.lat, location.lng]} />
+        <Marker position={[finalLocation.lat, finalLocation.lng]} />
         <ResizeMap />
       </MapContainer>
     </div>
