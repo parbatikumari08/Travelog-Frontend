@@ -15,13 +15,26 @@ L.Icon.Default.mergeOptions({
 // Force map to recalc size after render
 function ResizeMap() {
   const map = useMap();
+
   useEffect(() => {
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200); // small delay for modal transitions
+    const fix = () => map.invalidateSize({ animate: false });
+
+    // Fix initial mount
+    setTimeout(fix, 350);
+
+    // Fix during scrolling
+    window.addEventListener("scroll", fix);
+    window.addEventListener("resize", fix);
+
+    return () => {
+      window.removeEventListener("scroll", fix);
+      window.removeEventListener("resize", fix);
+    };
   }, [map]);
+
   return null;
 }
+
 
 export default function MiniMap({ location, height = "150px", zoom = 7 }) {
   if (!location) return null;
