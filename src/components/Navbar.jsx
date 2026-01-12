@@ -1,12 +1,13 @@
 // frontend/src/components/Navbar.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api";
-import "./Navbar.css"; // new CSS file
+import "./Navbar.css";
 
 export default function Navbar({ user, setUser, darkMode, toggleDarkMode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Hide navbar on welcome/login/register
   if (["/", "/login", "/register"].includes(location.pathname)) return null;
@@ -24,11 +25,21 @@ export default function Navbar({ user, setUser, darkMode, toggleDarkMode }) {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
+        {/* Logo */}
         <Link to="/dashboard" className="navbar-logo">
           Travelog
         </Link>
 
-        <div className="navbar-links">
+        {/* Hamburger for mobile */}
+        <button
+          className="navbar-hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? "✖" : "☰"}
+        </button>
+
+        {/* Desktop menu */}
+        <div className="navbar-links desktop-only">
           <Link to="/dashboard" className={isActive("/dashboard") ? "active" : ""}>
             Dashboard
           </Link>
@@ -37,7 +48,7 @@ export default function Navbar({ user, setUser, darkMode, toggleDarkMode }) {
           </Link>
 
           <button onClick={toggleDarkMode} className="toggle-btn">
-            {darkMode ? "Light Mode" : "Dark Mode"}
+            {darkMode ? "Light" : "Dark"}
           </button>
 
           {user && (
@@ -49,7 +60,54 @@ export default function Navbar({ user, setUser, darkMode, toggleDarkMode }) {
             </div>
           )}
         </div>
+
       </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <div className="mobile-menu">
+          <Link
+            to="/dashboard"
+            onClick={() => setMenuOpen(false)}
+            className={isActive("/dashboard") ? "active" : ""}
+          >
+            Dashboard
+          </Link>
+
+          <Link
+            to="/profile"
+            onClick={() => setMenuOpen(false)}
+            className={isActive("/profile") ? "active" : ""}
+          >
+            Profile
+          </Link>
+
+          <button
+            onClick={() => {
+              toggleDarkMode();
+              setMenuOpen(false);
+            }}
+            className="toggle-btn mobile-btn"
+          >
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+
+          {user && (
+            <>
+              <span className="mobile-user">{user.name}</span>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMenuOpen(false);
+                }}
+                className="logout-btn mobile-btn"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
