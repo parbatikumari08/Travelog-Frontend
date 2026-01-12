@@ -140,97 +140,102 @@ export default function DashboardPage() {
     }
   };
 
-  return (
-    <div style={shell.page}>
-      <div style={shell.grid}>
-        <div style={{ height: "100%", overflow: "hidden auto" }}>
-          <div style={shell.card}>
-            <h2 style={{ margin: "0 0 12px 0" }}>Add New Entry</h2>
+return (
+  <div className="max-w-6xl mx-auto p-4 h-auto min-h-[100vh]">
+    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 h-auto">
 
-            {newEntryPos && (
-              <div style={{ marginBottom: 12 }}>
-                <MiniMap location={newEntryPos} height="150px" zoom={7} />
-              </div>
-            )}
+      {/* LEFT: Form */}
+      <div className="h-full overflow-y-auto">
+        <div className="border rounded-xl p-4 shadow-sm bg-white">
 
-            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 10 }}>
+          <h2 className="text-xl font-semibold mb-3">Add New Entry</h2>
+
+          {newEntryPos && (
+            <div className="mb-3">
+              <MiniMap location={newEntryPos} height="150px" zoom={7} />
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full border rounded-lg p-2"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              className="w-full border rounded-lg p-2 min-h-[90px]"
+            />
+
+            <div>
+              <label className="font-medium mb-1 block">Images</label>
               <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                value={formData.title}
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
                 onChange={handleChange}
-                required
-                style={shell.input}
+                ref={imageInputRef}
               />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={formData.description}
+            </div>
+
+            <div>
+              <label className="font-medium mb-1 block">Videos</label>
+              <input
+                type="file"
+                name="videos"
+                accept="video/*"
+                multiple
                 onChange={handleChange}
-                required
-                style={shell.textarea}
+                ref={videoInputRef}
               />
+            </div>
 
-              <div>
-                <label style={shell.label}>Images</label>
-                <input
-                  type="file"
-                  name="images"
-                  accept="image/*"
-                  multiple
-                  onChange={handleChange}
-                  ref={imageInputRef}
-                />
-              </div>
-              <div>
-                <label style={shell.label}>Videos</label>
-                <input
-                  type="file"
-                  name="videos"
-                  accept="video/*"
-                  multiple
-                  onChange={handleChange}
-                  ref={videoInputRef}
-                />
-              </div>
+            <button
+              type="submit"
+              disabled={!newEntryPos}
+              className={`w-full py-2 rounded-lg text-white 
+                ${newEntryPos ? "bg-blue-600" : "bg-blue-400 cursor-not-allowed"}`}
+            >
+              Add Entry
+            </button>
+          </form>
 
-              <button
-                type="submit"
-                style={{ ...shell.btn, opacity: newEntryPos ? 1 : 0.5 }}
-                disabled={!newEntryPos}
-              >
-                Add Entry
-              </button>
-            </form>
-            {message && <p style={{ marginTop: 8, ...shell.muted }}>{message}</p>}
-          </div>
-        </div>
-
-        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-          <p
-            style={{
-              textAlign: "center",
-              padding: "8px",
-              fontSize: "14px",
-              fontWeight: 500,
-              background: "var(--card)",
-              borderRadius: "8px",
-              marginBottom: "6px",
-              color: "var(--text)",
-            }}
-          >
-            🗺️ Zoom and click on the desired location for entry
-          </p>
-          <div style={{ flex: 1 }}>
-            <MapContainer center={[20, 77]} zoom={5} style={{ height: "100%", width: "100%" }}>
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {newEntryPos && <Marker position={[newEntryPos.lat, newEntryPos.lng]} />}
-              <MapClickHandler />
-            </MapContainer>
-          </div>
+          {message && (
+            <p className="text-gray-600 text-sm mt-2">{message}</p>
+          )}
         </div>
       </div>
+
+      {/* RIGHT: Map */}
+      <div className="flex flex-col h-full">
+        <p className="text-center p-2 text-sm font-medium bg-gray-100 rounded-lg mb-2">
+          🗺️ Zoom and click on a location to add entry
+        </p>
+
+        <div className="flex-1">
+          <MapContainer
+            center={[20, 77]}
+            zoom={5}
+            className="h-[400px] lg:h-full w-full"
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {newEntryPos && <Marker position={[newEntryPos.lat, newEntryPos.lng]} />}
+            <MapClickHandler />
+          </MapContainer>
+        </div>
+      </div>
+
     </div>
-  );
-}
+  </div>
+);
+
