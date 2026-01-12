@@ -157,14 +157,7 @@ body.dark .navbar {
     text-align: left;
   }
 }
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 5000;
-  background: var(--card);
-}
+
 
 
 
