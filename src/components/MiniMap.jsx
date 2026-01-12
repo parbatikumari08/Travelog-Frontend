@@ -3,26 +3,26 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect } from "react";
 
-// Fix Leaflet marker icons
+// Fix markers
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Force map to recalc size after render
 function ResizeMap() {
   const map = useMap();
 
   useEffect(() => {
-    const fix = () => map.invalidateSize({ animate: false });
+    const fix = () => {
+      map.invalidateSize({ animate: false });
+    };
 
-    // Fix initial mount
+    // Fix after mount
     setTimeout(fix, 350);
 
-    // Fix during scrolling
+    // Fix when user scrolls or window resizes
     window.addEventListener("scroll", fix);
     window.addEventListener("resize", fix);
 
@@ -35,13 +35,9 @@ function ResizeMap() {
   return null;
 }
 
-
 export default function MiniMap({ location, height = "150px", zoom = 7 }) {
   if (!location) return null;
 
-  // Support both:
-  // { lat, lng }
-  // { coordinates: [lng, lat] }
   const finalLocation = location.lat
     ? location
     : {
@@ -67,8 +63,8 @@ export default function MiniMap({ location, height = "150px", zoom = 7 }) {
         zoom={zoom}
         scrollWheelZoom={false}
         dragging={false}
-        doubleClickZoom={false}
         zoomControl={false}
+        doubleClickZoom={false}
         attributionControl={false}
         style={{ width: "100%", height: "100%" }}
       >
