@@ -144,10 +144,9 @@ return (
   <div className="max-w-6xl mx-auto p-4 h-auto min-h-[100vh]">
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 h-auto">
 
-      {/* LEFT: Form */}
+      {/* LEFT PANEL — Form */}
       <div className="h-full overflow-y-auto">
         <div className="border rounded-xl p-4 shadow-sm bg-white">
-
           <h2 className="text-xl font-semibold mb-3">Add New Entry</h2>
 
           {newEntryPos && (
@@ -216,25 +215,27 @@ return (
         </div>
       </div>
 
-      {/* RIGHT: Map */}
+      {/* RIGHT PANEL — Map */}
       <div className="flex flex-col h-full">
         <p className="text-center p-2 text-sm font-medium bg-gray-100 rounded-lg mb-2">
-          🗺️ Zoom and click on a location to add entry
+          🗺️ Zoom and click on the desired location for entry
         </p>
 
-        <div className="flex-1">
+        {/* IMPORTANT: FIXED HEIGHT FOR MAP ON MOBILE */}
+        <div className="flex-1 min-h-[380px] lg:min-h-0">
           <MapContainer
             center={[20, 77]}
             zoom={5}
-            className="h-[400px] lg:h-full w-full"
+            className="h-full w-full"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {newEntryPos && <Marker position={[newEntryPos.lat, newEntryPos.lng]} />}
+            {newEntryPos && (
+              <Marker position={[newEntryPos.lat, newEntryPos.lng]} />
+            )}
             <MapClickHandler />
           </MapContainer>
         </div>
       </div>
-
     </div>
   </div>
 );
