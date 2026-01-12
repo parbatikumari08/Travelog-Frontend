@@ -261,3 +261,31 @@ body {
   max-width: 100%; /* prevent breaking layout */
   object-fit: contain;
 }
+/* FLEX + WRAP FOR MOBILE */
+.responsive-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* WRAP BUTTONS ON MOBILE */
+.responsive-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* RESPONSIVE MODAL PANEL */
+.responsive-modal {
+  width: min(600px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* MEDIA GRID RESPONSIVE */
+.responsive-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
