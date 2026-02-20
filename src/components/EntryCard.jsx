@@ -1,8 +1,6 @@
 // src/components/EntryCard.jsx
 import React from "react";
-import MiniMap from "./MiniMap"; // ✅ New lightweight minimap
-import "../pages/ProfilePage.css";
-
+import MiniMap from "./MiniMap";
 
 export default function EntryCard({
   entry,

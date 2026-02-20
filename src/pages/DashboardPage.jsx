@@ -1,17 +1,38 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "../api";
-import MapComponent from "../components/MapComponent";
 import MiniMap from "../components/MiniMap";
 import L from "leaflet";
+import { motion, AnimatePresence } from "framer-motion";
+import "./DashboardPage.css";
 
+// Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
+
+// Custom marker icon for selected location
+const selectedIcon = new L.Icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng);
+    },
+  });
+  return null;
+}
 
 export default function DashboardPage() {
   const [newEntryPos, setNewEntryPos] = useState(null);
@@ -21,105 +42,65 @@ export default function DashboardPage() {
     images: [],
     videos: [],
   });
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [recentEntries, setRecentEntries] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
-  const shell = useMemo(
-    () => ({
-      page: {
-        maxWidth: 1120,
-        margin: "0 auto",
-        padding: 16,
-        height: "calc(100vh - 64px)",
-        background: "var(--bg)",
-        color: "var(--text)",
-      },
-      grid: {
-        display: "grid",
-        gridTemplateColumns: "380px 1fr",
-        gap: 16,
-        height: "100%",
-      },
-      card: {
-        border: "1px solid var(--line)",
-        borderRadius: 12,
-        padding: 16,
-        background: "var(--card)",
-        color: "var(--text)",
-        boxShadow: "var(--shadow)",
-      },
-      btn: {
-        padding: "10px 12px",
-        borderRadius: 10,
-        border: "none",
-        background: "var(--brand)",
-        color: "#fff",
-        cursor: "pointer",
-      },
-      input: {
-        width: "100%",
-        border: "1px solid var(--line)",
-        borderRadius: 8,
-        padding: "10px 12px",
-        fontSize: 14,
-        background: "var(--card)",
-        color: "var(--text)",
-      },
-      textarea: {
-        width: "100%",
-        border: "1px solid var(--line)",
-        borderRadius: 8,
-        padding: "10px 12px",
-        minHeight: 90,
-        fontSize: 14,
-        background: "var(--card)",
-        color: "var(--text)",
-      },
-      label: {
-        display: "block",
-        fontSize: 13,
-        fontWeight: 600,
-        marginBottom: 6,
-        color: "var(--text)",
-      },
-      muted: { fontSize: 13, opacity: 0.8, color: "var(--muted)" },
-    }),
-    []
-  );
+  // Fetch recent entries on load
+  useEffect(() => {
+    fetchRecentEntries();
+  }, []);
 
-  function MapClickHandler() {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setNewEntryPos({ lat, lng });
-        setMessage("Location selected. Fill the form to add your entry.");
-      },
+  const fetchRecentEntries = async () => {
+    try {
+      const res = await api.get("/entries/recent");
+      setRecentEntries(res.data.slice(0, 3));
+    } catch (err) {
+      console.error("Failed to fetch recent entries:", err);
+    }
+  };
+
+  const handleMapClick = (latlng) => {
+    setNewEntryPos({ lat: latlng.lat, lng: latlng.lng });
+    setMessage({ 
+      type: "success", 
+      text: "📍 Location selected! Fill in the details below." 
     });
-    return null;
-  }
+    
+    // Auto-hide message after 3 seconds
+    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "images") setFormData((s) => ({ ...s, images: Array.from(files) }));
-    else if (name === "videos") setFormData((s) => ({ ...s, videos: Array.from(files) }));
-    else setFormData((s) => ({ ...s, [name]: value }));
+    if (name === "images") {
+      setFormData((s) => ({ ...s, images: Array.from(files) }));
+    } else if (name === "videos") {
+      setFormData((s) => ({ ...s, videos: Array.from(files) }));
+    } else {
+      setFormData((s) => ({ ...s, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newEntryPos) {
-      setMessage("Please click on the map to select a location first.");
+      setMessage({ type: "error", text: "Please click on the map to select a location first." });
       return;
     }
 
-    setMessage("Adding entry...");
+    setIsSubmitting(true);
+    setMessage({ type: "info", text: "Adding your memory..." });
+
     try {
       const fd = new FormData();
       fd.append("title", formData.title);
       fd.append("description", formData.description);
       fd.append("location", JSON.stringify(newEntryPos));
+      
       formData.images.forEach((f) => fd.append("media", f));
       formData.videos.forEach((f) => fd.append("media", f));
 
@@ -127,117 +108,260 @@ export default function DashboardPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // Reset form
       setFormData({ title: "", description: "", images: [], videos: [] });
       setNewEntryPos(null);
-
+      
       if (imageInputRef.current) imageInputRef.current.value = "";
       if (videoInputRef.current) videoInputRef.current.value = "";
 
-      setMessage("✅ Entry added in your Profile! Click on the map to add another.");
+      setMessage({ 
+        type: "success", 
+        text: "✨ Entry added successfully! Click on the map to add another." 
+      });
+      
+      // Refresh recent entries
+      fetchRecentEntries();
+
+      // Auto-hide message after 3 seconds
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (err) {
       console.error(err);
-      setMessage("❌ Failed to add entry. Try again.");
+      setMessage({ type: "error", text: "❌ Failed to add entry. Please try again." });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-return (
-  <div className="max-w-6xl mx-auto p-4 h-auto min-h-[100vh]">
-    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 h-auto">
+  const clearLocation = () => {
+    setNewEntryPos(null);
+    setMessage({ type: "", text: "" });
+  };
 
-      {/* LEFT PANEL — Form */}
-      <div className="h-full overflow-y-auto">
-        <div className="border rounded-xl p-4 shadow-sm bg-white">
-          <h2 className="text-xl font-semibold mb-3">Add New Entry</h2>
-
-          {newEntryPos && (
-            <div className="mb-3">
-              <MiniMap location={newEntryPos} height="150px" zoom={7} />
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-              type="text"
-              name="title"
-              placeholder="Title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg p-2"
-            />
-
-            <textarea
-              name="description"
-              placeholder="Description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg p-2 min-h-[90px]"
-            />
-
-            <div>
-              <label className="font-medium mb-1 block">Images</label>
-              <input
-                type="file"
-                name="images"
-                accept="image/*"
-                multiple
-                onChange={handleChange}
-                ref={imageInputRef}
-              />
-            </div>
-
-            <div>
-              <label className="font-medium mb-1 block">Videos</label>
-              <input
-                type="file"
-                name="videos"
-                accept="video/*"
-                multiple
-                onChange={handleChange}
-                ref={videoInputRef}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={!newEntryPos}
-              className={`w-full py-2 rounded-lg text-white 
-                ${newEntryPos ? "bg-blue-600" : "bg-blue-400 cursor-not-allowed"}`}
-            >
-              Add Entry
-            </button>
-          </form>
-
-          {message && (
-            <p className="text-gray-600 text-sm mt-2">{message}</p>
-          )}
-        </div>
+  return (
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <motion.h1 
+          className="dashboard-title"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Travel Dashboard
+        </motion.h1>
+        <motion.p 
+          className="dashboard-subtitle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          Document your journey, one location at a time
+        </motion.p>
       </div>
 
-      {/* RIGHT PANEL — Map */}
-      <div className="flex flex-col h-full">
-        <p className="text-center p-2 text-sm font-medium bg-gray-100 rounded-lg mb-2">
-          🗺️ Zoom and click on the desired location for entry
-        </p>
+      <div className="dashboard-grid">
+        {/* Map Section - First in mobile view */}
+        {/* Map Section - With Full Controls */}
+<motion.div 
+  className="map-section"
+  initial={{ opacity: 0, x: 20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+>
+  <div className="map-header">
+    <span className="map-instruction">🗺️ Click anywhere on the map to add a memory</span>
+  </div>
+  <div className="map-container">
+    <MapContainer
+      center={[20, 77]}
+      zoom={5}
+      className="leaflet-map"
+      zoomControl={true}
+      scrollWheelZoom={true}
+      doubleClickZoom={true}
+      dragging={true}
+      touchZoom={true}
+      attributionControl={true}
+    >
+      <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      />
+      {newEntryPos && (
+        <Marker 
+          position={[newEntryPos.lat, newEntryPos.lng]} 
+          icon={selectedIcon}
+        />
+      )}
+      <MapClickHandler onMapClick={handleMapClick} />
+    </MapContainer>
+  </div>
+  
+  {/* Quick Tips - Updated */}
+  <div className="map-tips">
+    <span className="tip">🔍 Scroll to zoom</span>
+    <span className="tip">👆 Click to drop pin</span>
+  </div>
+</motion.div>
+        {/* Form Section - Second in mobile view */}
+        <motion.div 
+          className="form-section"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="form-card">
+            <h2 className="section-title">Add New Memory</h2>
+            
+            {/* Location Preview */}
+            <AnimatePresence>
+              {newEntryPos && (
+                <motion.div 
+                  className="location-preview"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <div className="preview-header">
+                    <span className="preview-title">Selected Location</span>
+                    <button onClick={clearLocation} className="clear-btn">✕</button>
+                  </div>
+                  <MiniMap location={newEntryPos} height="150px" zoom={10} />
+                  <div className="coordinates">
+                    <span>Lat: {newEntryPos.lat.toFixed(4)}</span>
+                    <span>Lng: {newEntryPos.lng.toFixed(4)}</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* IMPORTANT: FIXED HEIGHT FOR MAP ON MOBILE */}
-        <div className="flex-1 min-h-[380px] lg:min-h-0">
-          <MapContainer
-            center={[20, 77]}
-            zoom={5}
-            className="h-full w-full"
-          >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {newEntryPos && (
-              <Marker position={[newEntryPos.lat, newEntryPos.lng]} />
-            )}
-            <MapClickHandler />
-          </MapContainer>
-        </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="entry-form">
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="E.g., Sunset at the beach"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea
+                  name="description"
+                  placeholder="Share your experience..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  className="form-textarea"
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Images</label>
+                <div className="file-input-wrapper">
+                  <input
+                    type="file"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                    onChange={handleChange}
+                    ref={imageInputRef}
+                    className="file-input"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" className="file-label">
+                    📸 Choose Images
+                  </label>
+                </div>
+                {formData.images.length > 0 && (
+                  <span className="file-count">{formData.images.length} image(s) selected</span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Videos</label>
+                <div className="file-input-wrapper">
+                  <input
+                    type="file"
+                    name="videos"
+                    accept="video/*"
+                    multiple
+                    onChange={handleChange}
+                    ref={videoInputRef}
+                    className="file-input"
+                    id="video-upload"
+                  />
+                  <label htmlFor="video-upload" className="file-label">
+                    🎥 Choose Videos
+                  </label>
+                </div>
+                {formData.videos.length > 0 && (
+                  <span className="file-count">{formData.videos.length} video(s) selected</span>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={!newEntryPos || isSubmitting}
+                className={`submit-btn ${!newEntryPos ? 'disabled' : ''}`}
+              >
+                {isSubmitting ? (
+                  <span className="loader"></span>
+                ) : (
+                  <>
+                    <span>Add Memory</span>
+                    <span className="btn-arrow">→</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Message Toast */}
+            <AnimatePresence>
+              {message.text && (
+                <motion.div 
+                  className={`message-toast ${message.type}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  {message.text}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Recent Entries Preview */}
+          {recentEntries.length > 0 && (
+            <motion.div 
+              className="recent-entries"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h3 className="recent-title">Recent Memories</h3>
+              <div className="entries-list">
+                {recentEntries.map((entry, idx) => (
+                  <div key={idx} className="entry-preview">
+                    <div className="entry-icon">📍</div>
+                    <div className="entry-details">
+                      <h4>{entry.title}</h4>
+                      <p>{entry.description.substring(0, 50)}...</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
-  </div>
-);
+  );
 }
-

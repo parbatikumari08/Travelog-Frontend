@@ -1,64 +1,99 @@
-/* Light mode (default) */
+/* Light mode - Rich & Warm */
 body.light {
-  --nav-bg: #ffffff;
-  --nav-fg: #0f172a;
-  --nav-border: #e5e7eb;
-  --nav-accent: #2563eb;
+  /* Base colors - Deep & Rich */
+  --bg-primary: #f0ebe5;  /* Soft parchment */
+  --bg-secondary: #fff9f2;  /* Warm off-white */
+  --bg-tertiary: #e8dfd5;  /* Warm taupe */
+  --text-primary: #3a2c1b;  /* Deep espresso */
+  --text-secondary: #6b5a48;  /* Warm brown */
+  --text-muted: #9b8b7a;  /* Warm gray-brown */
+  --border-light: #e0d5c8;  /* Warm beige */
+  --border-medium: #cbbeb0;  /* Warm medium */
+  --accent: #8b6b4d;  /* Rich caramel */
+  --accent-hover: #6b4f38;  /* Dark caramel */
+  --accent-light: #b99e85;  /* Light caramel */
+  --shadow-sm: 0 4px 12px rgba(58, 44, 27, 0.05);
+  --shadow-md: 0 8px 24px rgba(58, 44, 27, 0.08);
+  --shadow-lg: 0 20px 40px -12px rgba(58, 44, 27, 0.12);
+  
+  /* Card colors */
+  --card-bg: #fff9f2;
+  --input-bg: #fff9f2;
+  
+  /* Profile page compatibility */
+  --bg: #f0ebe5;
+  --card: #fff9f2;
+  --text: #3a2c1b;
+  --muted: #9b8b7a;
+  --line: #e0d5c8;
+  --brand: #8b6b4d;
+  --danger: #b34a4a;
+  --shadow: 0 20px 40px -12px rgba(58, 44, 27, 0.12);
+  
+  /* Navbar */
+  --nav-bg: #fff9f2;
+  --nav-fg: #3a2c1b;
+  --nav-border: #e0d5c8;
+  --nav-accent: #8b6b4d;
+  
+  /* Toast colors */
+  --success-bg: #e6f0e6;
+  --success-text: #2d5a2d;
+  --success-border: #c0d6c0;
+  --error-bg: #fce8e8;
+  --error-text: #a13d3d;
+  --error-border: #f0c0c0;
+  --info-bg: #e6ecf5;
+  --info-text: #2d4a6b;
+  --info-border: #c0d0e6;
 }
 
-/* Dark mode */
+/* Dark mode - Deep & Moody */
 body.dark {
-  --nav-bg: #0f172a;
-  --nav-fg: #e2e8f0;
-  --nav-border: #1f2937;
-  --nav-accent: #22c55e;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Navbar */
-nav {
-  background-color: var(--nav-bg);
-  color: var(--nav-fg);
-  padding: 10px;
-  border-bottom: 1px solid var(--nav-border);
-}
-
-nav a {
-  color: var(--nav-fg);
-  margin-right: 15px;
-  text-decoration: none;
-}
-
-nav a:hover {
-  color: var(--nav-accent);
-}
-
-/* Welcome Page */
-.welcome-container {
-  text-align: center;
-  padding: 50px;
-}
-
-.welcome-container h1 {
-  font-size: 2.5rem;
-}
-
-.welcome-container p {
-  font-size: 1.2rem;
-}
-
-.welcome-container a {
-  font-size: 1.2rem;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.welcome-container a:hover {
-  text-decoration: underline;
+  /* Base colors - Deep & Moody */
+  --bg-primary: #1f1b16;  /* Deep espresso */
+  --bg-secondary: #2a241e;  /* Rich brown-black */
+  --bg-tertiary: #352e27;  /* Warm dark brown */
+  --text-primary: #e8d9cc;  /* Warm cream */
+  --text-secondary: #c4b5a5;  /* Warm taupe */
+  --text-muted: #9a8b7d;  /* Warm gray */
+  --border-light: #443d36;  /* Dark warm */
+  --border-medium: #5a4f46;  /* Medium warm */
+  --accent: #b99e85;  /* Warm caramel */
+  --accent-hover: #d4b9a0;  /* Light caramel */
+  --accent-light: #8b6b4d;  /* Dark caramel */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  
+  /* Card colors */
+  --card-bg: #2a241e;
+  --input-bg: #1f1b16;
+  
+  /* Profile page compatibility */
+  --bg: #1f1b16;
+  --card: #2a241e;
+  --text: #e8d9cc;
+  --muted: #9a8b7d;
+  --line: #443d36;
+  --brand: #b99e85;
+  --danger: #c76e6e;
+  --shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  
+  /* Navbar */
+  --nav-bg: #2a241e;
+  --nav-fg: #e8d9cc;
+  --nav-border: #443d36;
+  --nav-accent: #b99e85;
+  
+  /* Toast colors */
+  --success-bg: #1e2a1e;
+  --success-text: #b0d6b0;
+  --success-border: #2d3d2d;
+  --error-bg: #2a1e1e;
+  --error-text: #f0b0b0;
+  --error-border: #3d2d2d;
+  --info-bg: #1e2a35;
+  --info-text: #b0c6e6;
+  --info-border: #2d3d4a;
 }

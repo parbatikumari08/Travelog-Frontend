@@ -190,7 +190,7 @@ const LoginPage = ({ setUser }) => {
                 <span className="loader"></span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Log In</span>
                   <span className="btn-arrow">→</span>
                 </>
               )}
