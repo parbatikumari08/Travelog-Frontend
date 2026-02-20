@@ -1,3 +1,4 @@
+// frontend/src/pages/RegisterPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,18 +32,18 @@ const RegisterPage = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     setIsLoading(true);
     
     try {
       const res = await api.post("/auth/register", formData, {
-        withCredentials: true,
+        withCredentials: true, // ✅ same as login
       });
-      setUser(res.data);
-      navigate("/dashboard");
+      setUser(res.data); // update user in App state
+      navigate("/dashboard"); // redirect to dashboard
     } catch (err) {
       console.error("Register error:", err.response?.data);
-      setError(err.response?.data?.msg || "Registration failed");
-      setIsLoading(false);
+      setError(err.response?.data?.msg || "Registration failed"); // ✅ use msg
     }
   };
 
@@ -57,187 +58,108 @@ const RegisterPage = ({ setUser }) => {
   };
 
   return (
-    <div className="register-container">
-      {/* Animated Background */}
-      <div className="register-background">
-        <div className="gradient-orbit"></div>
-        <div className="gradient-orbit orbit-2"></div>
-        <div className="gradient-orbit orbit-3"></div>
-        <div className="noise-overlay"></div>
-      </div>
-
-      {/* Main Content */}
-      <motion.div 
-        className="register-wrapper"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -50 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          backgroundColor: "#fff",
+          padding: "2rem",
+          borderRadius: "12px",
+          width: "350px",
+          textAlign: "center",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+        }}
       >
-        <div className="register-card">
-          {/* Header */}
-          <motion.div 
-            className="register-header"
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+        <h2 style={{ marginBottom: "1rem" }}>Register</h2>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+            style={{
+              padding: "0.5rem",
+              marginBottom: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+            }}
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            style={{
+              padding: "0.5rem",
+              marginBottom: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+            }}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            style={{
+              padding: "0.5rem",
+              marginBottom: "0.5rem",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+            }}
+            required
+          />
+          {error && <p style={{ color: "red", fontSize: "0.9rem" }}>{error}</p>}
+          <button
+            type="submit"
+            style={{
+              padding: "0.5rem",
+              borderRadius: "6px",
+              border: "none",
+              backgroundColor: "#4f46e5",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginTop: "0.5rem",
+            }}
           >
-            <div className="logo-wrapper">
-              <span className="logo-icon">📔</span>
-            </div>
-            <h1 className="register-title">Create Account</h1>
-          </motion.div>
+            Register
+          </button>
+        </form>
 
-          {/* Error Message */}
-          <AnimatePresence>
-            {error && (
-              <motion.div 
-                className="error-message"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <span>⚠️</span>
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Register Form */}
-          <form onSubmit={handleSubmit} className="register-form">
-            {/* Name Field */}
-            <motion.div 
-              className="form-group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className={`input-wrapper ${focusedField === 'name' ? 'focused' : ''}`}>
-                <span className="input-icon">👤</span>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                />
-              </div>
-            </motion.div>
-
-            {/* Email Field */}
-            <motion.div 
-              className="form-group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.35 }}
-            >
-              <div className={`input-wrapper ${focusedField === 'email' ? 'focused' : ''}`}>
-                <span className="input-icon">📧</span>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                />
-              </div>
-            </motion.div>
-
-            {/* Password Field */}
-            <motion.div 
-              className="form-group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className={`input-wrapper ${focusedField === 'password' ? 'focused' : ''}`}>
-                <span className="input-icon">🔒</span>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                />
-              </div>
-              
-              {/* Simple Password Strength */}
-              {formData.password && (
-                <div className="password-strength">
-                  <div className="strength-bars">
-                    {[...Array(4)].map((_, i) => (
-                      <div 
-                        key={i}
-                        className="strength-bar"
-                        style={{
-                          backgroundColor: i < passwordStrength ? getPasswordStrengthColor() : '#e2e8f0'
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span className="strength-text" style={{ color: getPasswordStrengthColor() }}>
-                    {getPasswordStrengthText()}
-                  </span>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Compact Password Hint */}
-            {formData.password && passwordStrength < 2 && (
-              <motion.div 
-                className="password-hint"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                Use 8+ chars, uppercase & number
-              </motion.div>
-            )}
-
-            {/* Submit Button - New Color */}
-            <motion.button
-              type="submit"
-              className={`register-btn ${isLoading ? 'loading' : ''}`}
-              disabled={isLoading}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isLoading ? (
-                <span className="loader"></span>
-              ) : (
-                <>
-                  <span>Create Account</span>
-                  <span className="btn-arrow">→</span>
-                </>
-              )}
-            </motion.button>
-          </form>
-
-          {/* Login Link */}
-          <motion.div 
-            className="login-link"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+        <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#555" }}>
+          Already a user?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#4f46e5",
+              fontWeight: "bold",
+              cursor: "pointer",
+              padding: 0,
+            }}
           >
-            <p>
-              Already have an account?{' '}
-              <button onClick={() => navigate("/login")}>
-                Sign In
-              </button>
-            </p>
-          </motion.div>
-        </div>
+            Login
+          </button>
+        </p>
       </motion.div>
     </div>
   );

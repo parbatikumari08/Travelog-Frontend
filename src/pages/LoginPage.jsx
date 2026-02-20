@@ -10,9 +10,9 @@ const LoginPage = ({ setUser }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Show demo credentials elegantly
   useEffect(() => {
     setShowDemo(true);
     const timer = setTimeout(() => setShowDemo(false), 8000);
@@ -26,10 +26,7 @@ const LoginPage = ({ setUser }) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    
-    // Simulate loading state
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     try {
       const res = await api.post("/auth/login", formData);
       setUser(res.data);
@@ -66,7 +63,7 @@ const LoginPage = ({ setUser }) => {
         transition={{ duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }}
       >
         <div className="login-card">
-          {/* Header with Logo - Changed icon */}
+          {/* Header with Logo */}
           <motion.div 
             className="login-header"
             initial={{ y: -20, opacity: 0 }}
@@ -147,7 +144,7 @@ const LoginPage = ({ setUser }) => {
               </div>
             </motion.div>
 
-            {/* Password Field */}
+            {/* Password Field with Hide/Show Toggle */}
             <motion.div 
               className="form-group"
               initial={{ x: -20, opacity: 0 }}
@@ -157,7 +154,7 @@ const LoginPage = ({ setUser }) => {
               <div className={`input-wrapper ${focusedField === 'password' ? 'focused' : ''} ${formData.password ? 'filled' : ''}`}>
                 <span className="input-icon">🔒</span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Password"
                   value={formData.password}
@@ -166,7 +163,15 @@ const LoginPage = ({ setUser }) => {
                   onBlur={() => setFocusedField(null)}
                   required
                 />
-                {formData.password && <span className="input-check">✓</span>}
+                <button 
+                  type="button"
+                  className="password-toggle-text"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+                {formData.password && !showPassword && <span className="input-check">✓</span>}
               </div>
             </motion.div>
 
